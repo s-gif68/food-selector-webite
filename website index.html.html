@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>老娘肚子餓 - 餐點推薦系統</title>
+  <style>
+    body { font-family: "微軟正黑體", sans-serif; background-color: #fff8f0; padding: 20px; }
+    h1 { color: #c0392b; }
+    .meal { border: 1px solid #ccc; padding: 10px; margin-top: 10px; background-color: #fff; }
+    button { margin: 5px; }
+    .favorites { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🌟 老娘肚子餓 - 餐點推薦系統 🌟</h1>
+
+  <label>請選擇口味偏好：
+    <select id="preference">
+      <option value="中式">中式</option>
+      <option value="西式">西式</option>
+      <option value="素食">素食</option>
+    </select>
+  </label>
+  <button onclick="suggestMeal()">推薦餐點</button>
+
+  <div class="meal" id="mealDisplay"></div>
+
+  <div>
+    <button onclick="addToFavorites()">收藏這道餐點</button>
+    <button onclick="showFavorites()">查看我的最愛</button>
+  </div>
+
+  <div class="favorites" id="favoritesDisplay"></div>
+
+  <script>
+    const MEALS_DB = {
+      "早餐": {
+        "中式": [
+          { name: "豆漿配燒餅", desc: "傳統中式早餐，酥脆燒餅搭配溫熱豆漿", calories: 450 },
+          { name: "鹹豆漿", desc: "加入醬油與蔥花的溫豆漿", calories: 320 }
+        ],
+        "西式": [
+          { name: "三明治", desc: "起司火腿三明治配柳橙汁", calories: 480 },
+          { name: "可頌配拿鐵", desc: "酥脆可頌搭配香濃拿鐵", calories: 520 }
+        ],
+        "素食": [
+          { name: "蔬菜三明治", desc: "滿滿生菜與蕃茄，清爽健康", calories: 350 }
+        ]
+      },
+      "午餐": {
+        "中式": [
+          { name: "滷肉飯", desc: "香氣四溢的滷肉配白飯", calories: 650 },
+          { name: "牛肉麵", desc: "紅燒牛肉湯頭香濃", calories: 750 }
+        ],
+        "西式": [
+          { name: "漢堡", desc: "牛肉漢堡加起司與薯條", calories: 800 },
+          { name: "凱薩沙拉", desc: "酥炸雞塊與凱薩醬搭配生菜", calories: 520 }
+        ],
+        "素食": [
+          { name: "香菇燴飯", desc: "香氣十足的香菇與白飯", calories: 400 }
+        ]
+      },
+      "晚餐": {
+        "中式": [
+          { name: "火鍋", desc: "多樣蔬菜與肉片，溫暖一整晚", calories: 800 },
+          { name: "炒青菜配飯", desc: "清爽健康的晚餐選擇", calories: 400 }
+        ],
+        "西式": [
+          { name: "披薩", desc: "經典起司披薩", calories: 700 },
+          { name: "蔬菜濃湯", desc: "香濃奶油湯搭配麵包", calories: 420 }
+        ],
+        "素食": [
+          { name: "涼麵", desc: "芝麻醬涼麵，開胃又清爽", calories: 390 }
+        ]
+      }
+    };
+
+    let currentMeal = null;
+    let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+
+    function getCurrentMealPeriod() {
+      const hour = new Date().getHours();
+      if (hour >= 5 && hour < 11) return "早餐";
+      if (hour >= 11 && hour < 17) return "午餐";
+      return "晚餐";
+    }
+
+    function suggestMeal() {
+      const preference = document.getElementById("preference").value;
+      const period = getCurrentMealPeriod();
+      const options = MEALS_DB[period][preference] || MEALS_DB[period]["中式"];
+      currentMeal = options[Math.floor(Math.random() * options.length)];
+      document.getElementById("mealDisplay").innerHTML =
+        `<h3>🍽️ 【${period}推薦】${currentMeal.name}</h3>
+        <p>${currentMeal.desc}</p>
+        <p>熱量：約 ${currentMeal.calories} 大卡</p>`;
+    }
+
+    function addToFavorites() {
+      if (!currentMeal) return alert("請先推薦一個餐點！");
+      if (!favorites.find(m => m.name === currentMeal.name)) {
+        favorites.push(currentMeal);
+        localStorage.setItem("favorites", JSON.stringify(favorites));
+        alert(`✅ 已收藏：${currentMeal.name}`);
+      } else {
+        alert(`📌 「${currentMeal.name}」已經在最愛清單中`);
+      }
+    }
+
+    function showFavorites() {
+      if (favorites.length === 0) {
+        document.getElementById("favoritesDisplay").innerHTML = "❗ 你還沒有收藏任何餐點。";
+        return;
+      }
+      const list = favorites.map(m => 
+        `<li>${m.name} - ${m.desc}（${m.calories} 大卡）</li>`).join("");
+      document.getElementById("favoritesDisplay").innerHTML = `<ul>${list}</ul>`;
+    }
+  </script>
+</body>
+</html>
